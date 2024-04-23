@@ -1,0 +1,89 @@
+use northwind
+
+
+-- {CUSTOMER NAME AND SALES}
+SELECT 
+    customers.FirstName, 
+    customers.LastName, 
+	CONCAT(customers.FirstName, ' ',customers.LastName) as FullName,
+    orders.OrderID,
+    orders_details.UnitPrice,
+    orders_details.Quantity,
+    SUM(orders_details.UnitPrice * orders_details.Quantity) AS TotalSales
+FROM 
+    Customers
+JOIN 
+    orders ON customers.CustomerID = orders.CustomerID
+JOIN 
+    orders_details ON orders.OrderID = orders_details.OrderID
+GROUP BY 
+    customers.FirstName, customers.LastName, orders.OrderID, orders_details.UnitPrice, orders_details.Quantity;
+
+
+	
+	  -- {EMPLOYEE FIRST NAMES AND AVG PRICE}
+SELECT 
+    distinct Employees.FirstName,
+    orders_details.UnitPrice,
+    orders_details.Quantity,
+    avg(orders_details.UnitPrice * orders_details.Quantity) AS AVGsales,
+	Orders.OrderDate
+FROM 
+	Employees
+JOIN 
+    orders ON Employees.EmployeeID = orders.EmployeeID
+JOIN 
+    orders_details ON orders.OrderID = orders_details.OrderID
+GROUP BY 
+    Orders.OrderDate, Employees.FirstName, orders_details.UnitPrice, orders_details.Quantity;
+
+
+	-- [Total freight split by Ship city]
+SELECT DISTINCT 
+Orders.ShipCity, sum(Orders.Freight) AS TotalFreight
+FROM 
+Orders
+GROUP BY 
+ShipCity;
+
+
+    -- [Total freight split by Employee fullname]
+SELECT 
+	Employees.EmployeeID, 
+	concat(Employees.FirstName, ' ', Employees.LastName) AS Fullname, sum(Orders.Freight) AS TotalFreight
+FROM 
+	Employees
+JOIN 
+	orders on Employees.EmployeeID = orders.EmployeeID
+GROUP BY 
+	Employees.EmployeeID, concat(Employees.FirstName, ' ', Employees.LastName);
+
+
+	 -- {Total sales split by Supplier Name and Category}
+SELECT 
+	Suppliers.CompanyName, 
+	Category.CategoryName,
+	Orders.OrderDate,
+sum(Orders_details.UnitPrice * Orders_details.Quantity) as totalsales
+FROM 
+	Suppliers
+JOIN 
+	Product on Suppliers.SupplierID = Product.SupplierID
+JOIN 
+	Category on Product.CategoryID = Category.CategoryID
+JOIN 
+	Orders_details on Product.ProductID = Orders_details.ProductID
+JOIN 
+	Orders on Orders_details.OrderID = Orders.OrderID
+GROUP BY Orders.OrderDate, Suppliers.CompanyName, Category.CategoryName;
+
+
+-- {Total freight split by Shippers}
+SELECT 
+	Orders.OrderDate,Shippers.CompanyName, sum(orders.Freight) as TotalFreight
+FROM 
+	Shippers
+JOIN 
+	orders on orders.ShipVia = Shippers.ShipperID
+GROUP BY 
+	Orders.Orderdate, Shippers.CompanyName;
